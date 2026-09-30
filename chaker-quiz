@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CHAKER LEGEND</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+margin:0;
+font-family:Arial,Tahoma,sans-serif;
+color:white;
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:15px;
+background:
+linear-gradient(#09091dcc,#12052eee),
+url("https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=2000&q=90")
+center/cover fixed;
+}
+
+.card{
+width:100%;
+max-width:850px;
+padding:25px;
+border-radius:25px;
+background:#111122e8;
+box-shadow:0 15px 50px #000;
+}
+
+h1{
+text-align:center;
+font-size:38px;
+margin:5px 0 10px;
+}
+
+.sub{
+text-align:center;
+opacity:.8;
+margin-bottom:25px;
+}
+
+.levels{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:12px;
+}
+
+button{
+font-family:inherit;
+cursor:pointer;
+border:0;
+color:white;
+font-weight:bold;
+}
+
+.level{
+padding:20px 10px;
+border-radius:18px;
+font-size:18px;
+}
+
+.easy{background:#087f5b}
+.medium{background:#b77900}
+.hard{background:#a71930}
+
+.hidden{display:none}
+
+.top{
+display:flex;
+justify-content:space-between;
+margin-bottom:15px;
+}
+
+.info{
+background:#ffffff18;
+padding:10px 14px;
+border-radius:12px;
+}
+
+.bar{
+height:10px;
+background:#ffffff18;
+border-radius:20px;
+overflow:hidden;
+margin:15px 0 25px;
+}
+
+.fill{
+height:100%;
+width:0;
+background:#a855f7;
+transition:.3s;
+}
+
+.question{
+font-size:25px;
+font-weight:bold;
+text-align:center;
+line-height:1.5;
+margin:25px 0;
+}
+
+.answers{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px;
+}
+
+.answer{
+padding:18px;
+border-radius:15px;
+background:#ffffff12;
+border:2px solid #ffffff20;
+font-size:18px;
+}
+
+.answer.correct{
+background:#087f5b;
+border-color:#38e8ad;
+}
+
+.answer.wrong{
+background:#a71930;
+border-color:#ff7180;
+}
+
+.next,.again{
+width:100%;
+margin-top:18px;
+padding:17px;
+border-radius:15px;
+font-size:18px;
+background:#7c3aed;
+}
+
+.result{
+text-align:center;
+}
+
+.big{
+font-size:65px;
+font-weight:bold;
+margin:20px;
+}
+
+@media(max-width:600px){
+.levels{grid-template-columns:1fr}
+.answers{grid-template-columns:1fr}
+.question{font-size:21px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<div id="menu">
+<h1>👑 CHAKER LEGEND 👑</h1>
+<div class="sub">🔥 تحدي المعرفة الأسطوري 🔥</div>
+
+<div class="levels">
+<button class="level easy" onclick="start('easy')">
+🟢 سهل
+</button>
+
+<button class="level medium" onclick="start('medium')">
+🟡 متوسط
+</button>
+
+<button class="level hard" onclick="start('hard')">
+🔴 صعب
+</button>
+</div>
+</div>
+
+
+<div id="game" class="hidden">
+
+<div class="top">
+<div class="info">🏆 <span id="score">0</span></div>
+<div class="info">⏱️ <span id="time">20</span></div>
+</div>
+
+<div style="text-align:center">
+السؤال <span id="num">1</span> / 100
+</div>
+
+<div class="bar">
+<div class="fill" id="fill"></div>
+</div>
+
+<div class="question" id="question"></div>
+
+<div class="answers" id="answers"></div>
+
+<button class="next hidden" id="next" onclick="next()">
+السؤال التالي ➜
+</button>
+
+</div>
+
+
+<div id="result" class="result hidden">
+
+<h2>🏆 انتهى التحدي!</h2>
+
+<div class="big">
+<span id="final">0</span>/100
+</div>
+
+<p>🔥 نتيجتك النهائية</p>
+
+<button class="again" onclick="again()">
+🔄 العب من جديد
+</button>
+
+<button class="again" onclick="home()">
+🏠 الرئيسية
+</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+const questions={
+
+easy:[
+["ما عاصمة الجزائر؟","الجزائر","وهران","عنابة","تلمسان"],
+["ما أكبر كوكب؟","المشتري","الأرض","المريخ","زحل"],
+["كم عدد أيام الأسبوع؟","7","5","6","8"],
+["ما الكوكب الأحمر؟","المريخ","الزهرة","عطارد","الأرض"],
+["ما رمز الأكسجين؟","O","X","C","A"],
+["كم عدد أشهر السنة؟","12","10","11","13"],
+["ما عاصمة فرنسا؟","باريس","روما","مدريد","برلين"],
+["ما أكبر قارة؟","آسيا","أفريقيا","أوروبا","أستراليا"],
+["ما أسرع حيوان بري؟","الفهد","الأسد","الحصان","النمر"],
+["كم عدد أضلاع المثلث؟","3","4","5","6"],
+["ما أقرب كوكب للشمس؟","عطارد","المريخ","الأرض","زحل"],
+["ما أكبر حيوان؟","الحوت الأزرق","الفيل","الأسد","الزرافة"],
+["كم ساعة في اليوم؟","24","12","20","30"],
+["ما العضو الذي يضخ الدم؟","القلب","الرئة","الكبد","المعدة"],
+["ما عاصمة اليابان؟","طوكيو","كيوتو","أوساكا","هيروشيما"],
+["ما عاصمة إيطاليا؟","روما","ميلانو","نابولي","تورينو"],
+["ما أكبر محيط؟","الهادئ","الأطلسي","الهندي","المتجمد"],
+["ما الغاز الذي نتنفسه؟","الأكسجين","الهيدروجين","الهيليوم","الكربون"],
+["كم يساوي 10×10؟","100","20","50","110"],
+["كم عدد القارات؟","7","5","6","8"]
+],
+
+medium:[
+["ما العنصر Fe؟","الحديد","الفضة","النحاس","الفلور"],
+["من رسم الموناليزا؟","ليوناردو دافنشي","بيكاسو","فان غوخ","رامبرانت"],
+["ما عاصمة أستراليا؟","كانبيرا","سيدني","ملبورن","بيرث"],
+["ما وحدة القوة؟","النيوتن","الجول","الواط","الأمبير"],
+["ما العدد الأولي الزوجي الوحيد؟","2","4","6","8"],
+["ما الغاز الأكثر في الغلاف الجوي؟","النيتروجين","الأكسجين","الهيدروجين","الكربون"],
+["ما عاصمة كندا؟","أوتاوا","تورونتو","مونتريال","فانكوفر"],
+["ما وحدة الطاقة؟","الجول","النيوتن","الأوم","الأمبير"],
+["ما سرعة الضوء تقريبًا؟","300 ألف كم/ث","30 ألف","3 آلاف","3 ملايين"],
+["ما عاصمة البرازيل؟","برازيليا","ريو","ساو باولو","سالڤادور"],
+["ما الكوكب المعروف بحلقاته؟","زحل","المشتري","المريخ","الزهرة"],
+["ما المعدن السائل؟","الزئبق","الحديد","النحاس","الألمنيوم"],
+["من كتب هاملت؟","شكسبير","هوميروس","دانتي","غوته"],
+["ما أصغر قارة؟","أستراليا","أوروبا","أفريقيا","آسيا"],
+["ما رمز الصوديوم؟","Na","So","S","N"],
+["ما أطول نهر في أفريقيا؟","النيل","الكونغو","النيجر","السنغال"],
+["ما أكبر عضو في جسم الإنسان؟","الجلد","الكبد","القلب","الرئة"],
+["كم عدد الكواكب؟","8","7","9","10"],
+["ما رمز الذهب؟","Au","Ag","Fe","Go"],
+["من كتب البؤساء؟","فيكتور هوغو","شكسبير","ديكنز","تولستوي"]
+],
+
+hard:[
+["ما العدد الذري للذهب؟","79","78","80","81"],
+["من وضع نظرية النسبية؟","أينشتاين","نيوتن","غاليليو","ماكسويل"],
+["ما أكثر عنصر في الكون؟","الهيدروجين","الأكسجين","الكربون","الحديد"],
+["ما أكبر قمر في المجموعة الشمسية؟","غانيميد","تيتان","أوروبا","القمر"],
+["من اكتشف البنسلين؟","ألكسندر فليمنغ","باستور","نيوتن","داروين"],
+["ما أقرب نجم للشمس؟","بروكسيما قنطورس","الشعرى","النسر الواقع","منكب الجوزاء"],
+["ما قيمة الجاذبية الأرضية؟","9.8 م/ث²","8.2","10.8","12.5"],
+["ما العنصر ذو العدد الذري 6؟","الكربون","الأكسجين","النيتروجين","البورون"],
+["من كتب الأمير؟","مكيافيلي","أفلاطون","أرسطو","سقراط"],
+["ما أصغر وحدة للعنصر؟","الذرة","الجزيء","الخلية","النواة"],
+["ما أسرع كوكب دورانًا؟","المشتري","الأرض","المريخ","زحل"],
+["ما أكبر بركان في المجموعة الشمسية؟","أوليمبوس مونس","إتنا","فيزوف","كيليمنجارو"],
+["ما وحدة المقاومة الكهربائية؟","الأوم","الفولت","الأمبير","الواط"],
+["من وضع قوانين الحركة؟","نيوتن","أينشتاين","كبلر","غاليليو"],
+["ما المادة الوراثية الأساسية؟","DNA","RNA","ATP","ADP"],
+["ما اسم مجرتنا؟","درب التبانة","أندروميدا","مثلث","ماجلان"],
+["ما العدد الذي لا يقبل القسمة إلا على 1 ونفسه؟","العدد الأولي","المركب","الزوجي","السالب"],
+["ما أصغر كوكب؟","عطارد","المريخ","الزهرة","نبتون"],
+["ما أعمق محيط؟","الهادئ","الأطلسي","الهندي","المتجمد"],
+["ما أقدم نظام كتابة معروف؟","المسمارية","اللاتينية","الهيروغليفية","السنسكريتية"]
+]
+
+};
+
+
+let level;
+let list=[];
+let index=0;
+let score=0;
+let timer;
+let seconds=20;
+let locked=false;
+
+
+function shuffle(a){
+
+let x=[...a];
+
+for(let i=x.length-1;i>0;i--){
+
+let j=Math.floor(Math.random()*(i+1));
+
+[x[i],x[j]]=[x[j],x[i]];
+
+}
+
+return x;
+
+}
+
+
+function make100(data){
+
+let all=[];
+
+for(let r=0;r<5;r++){
+
+data.forEach(q=>all.push(q));
+
+}
+
+return shuffle(all).slice(0,100);
+
+}
+
+
+function sound(ok){
+
+let ctx=new(window.AudioContext||window.webkitAudioContext)();
+
+let osc=ctx.createOscillator();
+let gain=ctx.createGain();
+
+osc.connect(gain);
+gain.connect(ctx.destination);
+
+if(ok){
+
+osc.frequency.value=700;
+gain.gain.value=.2;
+
+}else{
+
+osc.frequency.value=150;
+gain.gain.value=.2;
+
+}
+
+osc.start();
+
+osc.stop(ctx.currentTime+.35);
+
+}
+
+
+function start(l){
+
+level=l;
+
+list=make100(questions[l]);
+
+index=0;
+score=0;
+
+document.getElementById("menu").classList.add("hidden");
+document.getElementById("result").classList.add("hidden");
+document.getElementById("game").classList.remove("hidden");
+
+document.getElementById("score").textContent=0;
+
+show();
+
+}
+
+
+function show(){
+
+clearInterval(timer);
+
+locked=false;
+seconds=20;
+
+document.getElementById("time").textContent=20;
+
+let q=list[index];
+
+document.getElementById("num").textContent=index+1;
+
+document.getElementById("fill").style.width=(index+1)+"%";
+
+document.getElementById("question").textContent=q[0];
+
+let box=document.getElementById("answers");
+
+box.innerHTML="";
+
+let answers=shuffle(q.slice(1));
+
+answers.forEach(a=>{
+
+let b=document.createElement("button");
+
+b.className="answer";
+
+b.textContent=a;
+
+b.onclick=()=>answer(b,a,q[1]);
+
+box.appendChild(b);
+
+});
+
+document.getElementById("next").classList.add("hidden");
+
+timer=setInterval(()=>{
+
+seconds--;
+
+document.getElementById("time").textContent=seconds;
+
+if(seconds<=0){
+
+clearInterval(timer);
+
+locked=true;
+
+document.querySelectorAll(".answer").forEach(b=>b.disabled=true);
+
+document.querySelectorAll(".answer").forEach(b=>{
+
+if(b.textContent===q[1])b.classList.add("correct");
+
+});
+
+document.getElementById("next").classList.remove("hidden");
+
+sound(false);
+
+}
+
+},1000);
+
+}
+
+
+function answer(button,choice,correct){
+
+if(locked)return;
+
+locked=true;
+
+clearInterval(timer);
+
+document.querySelectorAll(".answer").forEach(b=>b.disabled=true);
+
+if(choice===correct){
+
+score++;
+
+button.classList.add("correct");
+
+sound(true);
+
+}else{
+
+button.classList.add("wrong");
+
+document.querySelectorAll(".answer").forEach(b=>{
+
+if(b.textContent===correct)b.classList.add("correct");
+
+});
+
+sound(false);
+
+}
+
+document.getElementById("score").textContent=score;
+
+document.getElementById("next").classList.remove("hidden");
+
+}
+
+
+function next(){
+
+index++;
+
+if(index>=100){
+
+finish();
+
+}else{
+
+show();
+
+}
+
+}
+
+
+function finish(){
+
+clearInterval(timer);
+
+document.getElementById("game").classList.add("hidden");
+document.getElementById("result").classList.remove("hidden");
+
+document.getElementById("final").textContent=score;
+
+}
+
+
+function again(){
+
+start(level);
+
+}
+
+
+function home(){
+
+document.getElementById("result").classList.add("hidden");
+document.getElementById("menu").classList.remove("hidden");
+
+}
+
+</script>
+
+</body>
+</html>
